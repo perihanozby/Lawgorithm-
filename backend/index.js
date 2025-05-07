@@ -38,7 +38,7 @@ app.post("/calculate", async (req, res) => {
     const first = items[0];
     const last = items[items.length - 1];
 
-    const usdStart = parseFloat(first["TP_DK_USD_S_YTL"]);
+    const usdStart = parseFloat(first["TP_DK_USD_S_YTL"]); //"_"
 
     const usdEnd = parseFloat(last["TP_DK_USD_S_YTL"]);
 
