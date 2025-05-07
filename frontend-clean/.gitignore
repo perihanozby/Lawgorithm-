@@ -21,3 +21,23 @@
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# Ana backend dosyasını gizle
+/backend/index.js
+
+# Frontend src klasörünü gizle (App.tsx vs.)
+/frontend-clean/src/
+
+# node_modules klasörlerini hariç tut
+**/node_modules/
+
+# Ortam değişkenleri
+.env
+
+# Build / derleme çıktıları
+build/
+dist/
+
+# IDE ve sistem dosyaları
+.vscode/
+.DS_Store
