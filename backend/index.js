@@ -6,7 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const API_KEY = "6ZLNsAAzDW"; 
+const API_KEY = "6ZLNsAAzDW";
 const SERIES = "TP.DK.USD.S.YTL-TP.DK.EUR.S.YTL-TP.FE.OKTG01-TP.MK.KUL.YTL";
 const FORMULAS = "0-0-0-0";
 const AGGREGATIONS = "avg-avg-avg-avg";
@@ -48,6 +48,8 @@ app.post("/calculate", async (req, res) => {
     // Detaylı kümülatif hesaplama ve veri saklama
     function calculateCumulativeByMonthDetailed(items, key, amount) {
       let updatedAmount = amount;
+      const startValue = parseFloat(items[0][key]);
+      const endValue = parseFloat(items[items.length - 1][key]);
       const growthData = [];
 
       for (let i = 1; i < items.length; i++) {
@@ -63,8 +65,14 @@ app.post("/calculate", async (req, res) => {
           });
         }
       }
-      return { result: updatedAmount, details: growthData };
+      return {
+        result: updatedAmount,
+        startValue,
+        endValue,
+        details: growthData
+      };
     }
+
 
     const usd = calculateCumulativeByMonthDetailed(items, "TP_DK_USD_S_YTL", amount);
     const eur = calculateCumulativeByMonthDetailed(items, "TP_DK_EUR_S_YTL", amount);
