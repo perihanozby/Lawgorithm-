@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 export default function Form() {
   const [formData, setFormData] = useState({
@@ -6,6 +7,8 @@ export default function Form() {
     paymentDate: "",
     today: new Date().toISOString().split("T")[0],
   });
+
+  const [results, setResults] = useState<any>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -24,18 +27,23 @@ export default function Form() {
       if (data.error) {
         alert("Hata: " + data.error);
       } else {
-        alert(`
-        📊 TCMB Verileri ile Hesaplama:
-        💵 Dolar: ${data.dolar} TL
-        💶 Euro: ${data.euro} TL
-        📈 TÜFE: ${data.tufe} TL
-        🧮 Ortalama: ${data.average} TL
-        `);
+        setResults(data);
       }
     } catch (error) {
       alert("Hesaplama sırasında beklenmeyen bir hata oluştu.");
       console.error(error);
     }
+  };
+
+  const mergeChartData = () => {
+    if (!results) return [];
+    return results.usd.details.map((usdData: any, index: number) => ({
+      date: usdData.date,
+      USD: parseFloat(usdData.value),
+      EURO: parseFloat(results.eur.details[index].value),
+      TÜFE: parseFloat(results.tufe.details[index].value),
+      Altın: parseFloat(results.gold.details[index].value),
+    }));
   };
 
   return (
@@ -87,6 +95,48 @@ export default function Form() {
       >
         Hesapla
       </button>
+
+      {results && (
+        <>
+          <div className="mt-6">
+            <h3 className="font-bold mb-2 text-center">📊 Dönemsel Detaylı Tablo</h3>
+            <table className="w-full text-sm border-collapse border border-gray-300">
+              <thead>
+                <tr className="bg-gray-100">
+                  <th className="border p-2">Parametre</th>
+                  <th className="border p-2">Son Değer (TL)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td className="border p-2">USD</td><td className="border p-2">{results.usd.result.toFixed(2)}</td></tr>
+                <tr><td className="border p-2">EURO</td><td className="border p-2">{results.eur.result.toFixed(2)}</td></tr>
+                <tr><td className="border p-2">TÜFE</td><td className="border p-2">{results.tufe.result.toFixed(2)}</td></tr>
+                <tr><td className="border p-2">Altın</td><td className="border p-2">{results.gold.result.toFixed(2)}</td></tr>
+                <tr className="font-bold bg-gray-50">
+                  <td className="border p-2">Ortalama</td><td className="border p-2">{results.average}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div className="mt-6">
+            <h3 className="font-bold mb-2 text-center">📈 Dönemsel Artış Grafiği</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={mergeChartData()}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" />
+                <YAxis />
+                <Tooltip />
+                <Legend />
+                <Line type="monotone" dataKey="USD" stroke="#8884d8" />
+                <Line type="monotone" dataKey="EURO" stroke="#82ca9d" />
+                <Line type="monotone" dataKey="TÜFE" stroke="#ffc658" />
+                <Line type="monotone" dataKey="Altın" stroke="#ff7300" />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </>
+      )}
     </form>
   );
 }
